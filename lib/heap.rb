@@ -40,8 +40,40 @@ class BinaryMinHeap
   end
 
   def self.heapify_down(array, parent_idx, len = array.length, &prc)
+    children = BinaryMinHeap.child_indices(len, parent_idx)
+    prc ||= Proc.new { |parent, child| parent <=> child }
+    return array if children.length == 0
+
+    # if children.length == 1
+    #   min_child = array[children[0]]
+    # elsif children.length == 2
+    #   min_child = prc.call(array[children[0]], array[children[1]]) == 1 ? array[children[1]] : array[children[0]]
+    # end
+
+    children.each do |child_idx|
+      if prc.call(array[parent_idx], array[child_idx]) == 1
+        array[parent_idx], array[min_child] = array[min_child], array[parent_idx]
+
+        new_parent_idx = min_child
+        BinaryMinHeap.heapify_down(array, new_parent_idx, &prc)
+      end
+    end
+
+    array
   end
 
   def self.heapify_up(array, child_idx, len = array.length, &prc)
+    return array if child_idx == 0
+    parent_idx = BinaryMinHeap.parent_index(child_idx)
+    comparison = prc || Proc.new { |parent, child| parent <=> child }
+
+    if comparison.call(array[parent_idx], array[child_idx]) == 1
+      array[parent_idx], array[child_idx] = array[child_idx], array[parent_idx]
+
+      new_child_idx = parent_idx
+      BinaryMinHeap.heapify_up(array, new_child_idx)
+    end
+
+    array
   end
 end
