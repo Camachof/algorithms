@@ -6,15 +6,23 @@ class BinaryMinHeap
   end
 
   def count
+    @store.count
   end
 
   def extract
+    @store[0], @store[-1] = @store[-1], @store[0]
+    extracted = @store.pop
+    BinaryMinHeap.heapify_down(@store, 0)
+    extracted
   end
 
   def peek
+
   end
 
   def push(val)
+    @store.push(val)
+    BinaryMinHeap.heapify_up(@store, @store.length - 1)
   end
 
   protected
@@ -44,12 +52,13 @@ class BinaryMinHeap
     prc ||= Proc.new { |parent, child| parent <=> child }
     return array if children.length == 0
 
-    # if children.length == 1
-    #   min_child = array[children[0]]
-    # elsif children.length == 2
-    #   min_child = prc.call(array[children[0]], array[children[1]]) == 1 ? array[children[1]] : array[children[0]]
-    # end
+    if children.length == 1
+      min_child = children[0]
+    elsif children.length == 2
+      min_child = prc.call(array[children[0]], array[children[1]]) == 1 ? children[1] : children[0]
+    end
 
+    byebug if min_child == 8
     children.each do |child_idx|
       if prc.call(array[parent_idx], array[child_idx]) == 1
         array[parent_idx], array[min_child] = array[min_child], array[parent_idx]
@@ -65,13 +74,13 @@ class BinaryMinHeap
   def self.heapify_up(array, child_idx, len = array.length, &prc)
     return array if child_idx == 0
     parent_idx = BinaryMinHeap.parent_index(child_idx)
-    comparison = prc || Proc.new { |parent, child| parent <=> child }
+    prc ||= Proc.new { |parent, child| parent <=> child }
 
-    if comparison.call(array[parent_idx], array[child_idx]) == 1
+    if prc.call(array[parent_idx], array[child_idx]) == 1
       array[parent_idx], array[child_idx] = array[child_idx], array[parent_idx]
 
       new_child_idx = parent_idx
-      BinaryMinHeap.heapify_up(array, new_child_idx)
+      BinaryMinHeap.heapify_up(array, new_child_idx, array.length, &prc)
     end
 
     array
